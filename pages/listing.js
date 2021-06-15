@@ -9,6 +9,7 @@ import SectionGrid from 'components/SectionGrid/SectionGrid';
 import { PostPlaceholder } from 'components/UI/ContentLoader/ContentLoader';
 import ListingMap from 'container/Listing/ListingMap';
 import { SearchContext } from 'context/SearchProvider';
+import { deviceType  } from 'react-device-detect';
 import GetAPIData, {
   Paginator,
   SearchedData,
@@ -29,6 +30,8 @@ import ListingWrapper, {
 const FilterDrawer = dynamic(() =>
   import('container/Listing/Search/MobileSearchView')
 );
+import fs from 'fs/promises';
+import path from 'path'
 
 export default function ListingPage(props) {
   const { state, dispatch } = useContext(SearchContext);
@@ -41,10 +44,10 @@ export default function ListingPage(props) {
 
   useEffect(() => {
     if (statekey === true) {
-      const newData = SearchedData(props.processedData);
+      const newData = SearchedData( props.processedData);
       setPosts(newData);
     } else {
-      setPosts(props.processedData.slice(0, LISTING_PAGE_POST_LIMIT) || []);
+      setPosts( props.processedData.slice(0, LISTING_PAGE_POST_LIMIT) || []);
     }
   }, [statekey]);
 
@@ -55,7 +58,7 @@ export default function ListingPage(props) {
   const handleLoadMore = () => {
     setLoading(true);
     setTimeout(() => {
-      const data = Paginator(posts, props.processedData, LISTING_PAGE_POST_LIMIT);
+      const data = Paginator(posts,  props.processedData, LISTING_PAGE_POST_LIMIT);
       setPosts(data);
       setLoading(false);
     }, 1000);
@@ -67,7 +70,9 @@ export default function ListingPage(props) {
   }
 
   let columnCount = 'col-24';
-
+  if (deviceType === 'desktop' && showMap === true) {
+    columnCount = 'col-12';
+  }
 
   return (
     <ListingWrapper>
@@ -77,7 +82,9 @@ export default function ListingPage(props) {
 
       <Sticky top={82} innerZ={999} activeClass="isHeaderSticky">
         <Toolbar
-
+          left={
+            deviceType === 'desktop' ? <CategorySearch /> : <FilterDrawer />
+          }
           right={
             <ShowMapCheckbox>
               <Checkbox defaultChecked={false} onChange={handleMapToggle}>
@@ -92,6 +99,7 @@ export default function ListingPage(props) {
         <SectionGrid
           link={SINGLE_POST_PAGE}
           columnWidth={columnWidth}
+          deviceType={deviceType}
           data={posts}
           totalItem={props.processedData.length}
           limit={LISTING_PAGE_POST_LIMIT}
@@ -106,15 +114,20 @@ export default function ListingPage(props) {
 }
 
 export async function getStaticProps() {
-  const apiUrl = [
-    {
-      endpoint: 'hotel',
-      name: 'listingHotel',
-    },
-  ];
-  const pageData = await GetAPIData(apiUrl);
-  const processedData = ProcessAPIData(pageData);
+  //Use when Loading data form DB
+  // const apiUrl = [
+  //   {
+  //     endpoint: 'hotel',
+  //     name: 'listingHotel',
+  //   },
+  // ];
+  // const pageData = await GetAPIData(apiUrl);
+  // const processedData = ProcessAPIData(pageData);
+    //Loading data from local files
+  const filePath = path.join(process.cwd(), 'static', 'data', 'hotel.json')
+  const jsonData = await fs.readFile(filePath)
+  const data = JSON.parse(jsonData)
   return {
-    props: { processedData: processedData },
+    props: { processedData: data },
   };
 }
