@@ -16,16 +16,14 @@ export default function profilePage(props) {
 }
 
 export async function getStaticProps() {
-  //Use when Loading data form DB
-  // const apiUrl = [
-  //   {
-  //     endpoint: 'agent',
-  //     name: 'listingAgent',
-  //   },
-  // ];
+  const apiUrl = [
+    {
+      endpoint: 'agent',
+      name: 'listingAgent',
+    },
+  ];
   // const pageData = await GetAPIData(apiUrl);
   // const processedData = ProcessAPIData(pageData);
-    //Loading data from local files
   const filePath = path.join(process.cwd(), 'static', 'data', 'agent.json')
   const jsonData = await fs.readFile(filePath)
   const data = JSON.parse(jsonData)

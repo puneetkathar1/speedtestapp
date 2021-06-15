@@ -5,7 +5,7 @@ import Sticky from 'react-stickynode';
 import { Row, Col, Modal, Button } from 'antd';
 import Container from 'components/UI/Container/Container';
 import Loader from 'components/Loader/Loader';
-import { deviceType  } from 'react-device-detect';
+import { getDeviceType } from 'library/helpers/get_device_type';
 import GetAPIData, { ProcessAPIData } from 'library/helpers/get_api_data';
 import Description from 'container/SinglePage/Description/Description';
 import Amenities from 'container/SinglePage/Amenities/Amenities';
@@ -149,7 +149,8 @@ export async function getServerSideProps(context) {
   ];
   const pageData = await GetAPIData(apiUrl);
   const processedData = ProcessAPIData(pageData);
+  const deviceType = getDeviceType(req);
   return {
-    props: { query, processedData },
+    props: { query, processedData, deviceType },
   };
 }
